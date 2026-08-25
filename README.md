@@ -4,7 +4,7 @@
 
 ![Polished demo scene](Documentation/Images/material-accumulation-preview.png)
 
-Статус: механика, production-polish сцены/UI, автоматические тесты и Windows Development Build проверены. Перед отправкой остаются длительный ручной Profiler-прогон и запись короткого видео.
+Статус: механика, production-polish сцены/UI, автоматические тесты и стандартная Windows-сборка проверены. Перед отправкой остаются длительный ручной Profiler-прогон и запись короткого видео.
 
 ## Запуск
 
@@ -12,14 +12,7 @@
 2. Открыть `Assets/_Project/Scenes/MaterialAccumulationDemo.unity`.
 3. Запустить Play Mode.
 
-Демо уже является первой и единственной сценой в Build Settings. Воспроизводимые Editor-команды:
-
-```text
-Tools → Material Accumulation → Open Demo Scene                 F8
-Tools → Material Accumulation → Rebuild Demo Scene             Ctrl+Shift+G
-Tools → Material Accumulation → Build Windows Development
-Tools → Material Accumulation → Build Windows Release
-```
+Демо является первой и единственной сценой в Build Settings. Standalone собирается стандартными средствами Unity через `File → Build Profiles`.
 
 ## Управление
 
@@ -67,7 +60,6 @@ Input System / AnimationCurve / Time
 - `PromVR.MaterialAccumulation.Core` — чистый C# с `noEngineReferences: true`.
 - `PromVR.MaterialAccumulation.Unity` — ввод, lifecycle, coordinate conversion и Mesh view.
 - `PromVR.MaterialAccumulation.Presentation` — безаллокционный HUD, зависящий только от read-only API controller-а.
-- `PromVR.MaterialAccumulation.Editor` — воспроизводимая сборка сцены, материалов, post-process и Windows Player.
 - Preview полусферы — один переиспользуемый объект; порции материала не создают GameObject/Mesh.
 - Simulation и Mesh sync размечены отдельными `ProfilerMarker`.
 
@@ -79,13 +71,12 @@ Input System / AnimationCurve / Time
 
 | Проверка | Результат |
 |---|---|
-| Компиляция Core/Unity/Presentation/Editor/tests | успешно |
+| Компиляция Core/Unity/Presentation/tests | успешно |
 | Edit Mode | `13/13 Passed` |
 | Play Mode | `2/2 Passed` |
 | Steady hot-path allocation guard | `0 B` за 90 последовательных swept updates после прогрева |
 | Runtime object stability | число material GameObject и runtime Mesh не растёт |
-| Windows Development Build | `155.7 MB`, `49.6 s`, успешно |
-| Standalone smoke | 8 секунд, D3D12, без runtime exceptions |
+| Windows Standalone Build | `95.1 MB`, `145.5 s` на холодной изолированной копии, успешно |
 | Test-only visual render | успешно, кадр выше |
 
 Allocation guard измеряет синхронный участок `Core + dirty Mesh sync` на текущем потоке. Это сильная автоматическая регрессия, но не подменяет обязательный финальный 60-секундный Profiler capture без Deep Profile.
@@ -94,17 +85,14 @@ Allocation guard измеряет синхронный участок `Core + di
 
 ```text
 Assets/_Project/
-├── Art/
 ├── Materials/
-├── Prefabs/
 ├── Scenes/
 ├── Scripts/
-│   ├── Editor/
 │   ├── Presentation/
 │   └── Runtime/
 │       ├── Core/
 │       └── Unity/
-├── Settings/
+├── Settings/Rendering/
 └── Tests/
     ├── EditMode/
     └── PlayMode/

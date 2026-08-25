@@ -97,12 +97,12 @@ Time          ┘                                  │
 
 Unity-зависимости заканчиваются в этой сборке. `AnimationCurve`, `Time`, Input System, `Mesh`, материалы и жизненный цикл компонентов не проникают в Core.
 
-### 4.3 Presentation и Editor tooling
+### 4.3 Presentation и delivery assets
 
 - `PromVR.MaterialAccumulation.Presentation` содержит только HUD и читает узкий read-only API controller-а. Накопление из UI не вызывается.
 - HUD обновляет Image fill и меняет заранее созданные строки только при смене состояния; per-frame форматирования чисел нет.
-- `PromVR.MaterialAccumulation.Editor` воспроизводимо собирает сцену, материалы, URP post-process и Player Settings через Editor API.
-- Отдельный build pipeline создаёт Windows Development/Release Player из одной проверенной сцены.
+- Готовая демо-сцена является единственной сценой в Build Settings и собирается стандартным Unity Build Profile.
+- Специальные scene builder/build pipeline не поставляются: после фиксации сцены они стали лишней зависимостью от Editor API.
 - Simulation и dirty Mesh sync имеют именованные `ProfilerMarker`, чтобы измерять их независимо в Profiler.
 
 ### 4.4 Почему состояние не хранится в вершинах
@@ -290,16 +290,10 @@ Runtime Mesh уничтожается в `OnDestroy`. Persistent native buffer �
 
 ```text
 Assets/_Project/
-├── Art/
 ├── Materials/
-├── Prefabs/
 ├── Scenes/
 │   └── MaterialAccumulationDemo.unity
 ├── Scripts/
-│   ├── Editor/
-│   │   ├── MaterialAccumulationDemoBuilder.cs
-│   │   ├── MaterialAccumulationBuildPipeline.cs
-│   │   └── PromVR.MaterialAccumulation.Editor.asmdef
 │   ├── Presentation/
 │   │   ├── DemoHudBehaviour.cs
 │   │   └── PromVR.MaterialAccumulation.Presentation.asmdef
@@ -318,6 +312,10 @@ Assets/_Project/
 │           ├── HemisphereZoneView.cs
 │           └── PromVR.MaterialAccumulation.Unity.asmdef
 ├── Settings/
+│   └── Rendering/
+│       ├── DesktopRenderer.asset
+│       ├── DesktopRenderPipeline.asset
+│       └── UniversalRenderPipelineGlobalSettings.asset
 ├── Tests/
 │   ├── EditMode/
 │   │   ├── HeightFieldTests.cs
@@ -529,11 +527,11 @@ Jobs/GPU не должны появляться до профилировани�
 
 На 2026-08-25 собран и проверен production-polish pass:
 
-- Core, Unity runtime, Presentation, Editor tooling, URP-материалы и демо-сцена компилируются в Unity `6000.3.10f1`;
+- Core, Unity runtime, Presentation, URP-материалы и демо-сцена компилируются в Unity `6000.3.10f1`;
 - `13/13` Edit Mode тестов пройдены в batch mode;
 - `2/2` Play Mode тестов пройдены: сцена загружается, сохраняет число GameObject/Mesh и выполняет 90 swept updates с `0 B` managed allocations после прогрева;
-- Windows Development Build собран из чистой output-папки: `155.7 MB` за `49.6 s`;
-- standalone Player прошёл 8-секундный D3D12 smoke без runtime exceptions;
+- стандартный Windows Standalone Player собран из холодной изолированной копии: `95.1 MB` за `145.5 s`;
+- отдельный Play Mode smoke загружает финальную сцену и проверяет стабильность runtime-объектов;
 - неиспользуемые AI/Sentis, Pipeline, Visual Scripting, Multiplayer, Collab, Navigation и Timeline direct packages удалены; clean build уменьшился с `201.4 MB / 243.1 s` до `155.7 MB / 49.6 s`;
 - сцена `Assets/_Project/Scenes/MaterialAccumulationDemo.unity` назначена стартовой в Build Settings;
 - рабочие assets расположены внутри `Assets/_Project`, документационный кадр — в `Documentation/Images`.
@@ -547,7 +545,7 @@ Jobs/GPU не должны появляться до профилировани�
 
 Задание готово к отправке только когда выполнено всё ниже:
 
-- [ ] Чистое клонирование открывается в указанной Unity без ошибок Console.
+- [x] Чистое клонирование открывается в указанной Unity без ошибок Console.
 - [x] Demo Scene является стартовой и сразу объясняет управление.
 - [x] Все обязательные Inspector-параметры работают во время выполнения.
 - [x] Статическое, движущееся, быстрое, повторное и пересекающееся накопление показано и корректно.
@@ -575,3 +573,4 @@ Jobs/GPU не должны появляться до профилировани�
 | 2026-08-25 | Отдельная Presentation-сборка только для существующего HUD | UI не загрязняет runtime/Core, зависимость остаётся направленной внутрь |
 | 2026-08-25 | Статичный cover скрывает первые 2 mm высоты | Нулевой оранжевый Mesh визуально не выглядит уже накопленным материалом |
 | 2026-08-25 | Удалены неиспользуемые template packages | Clean build уменьшился на 45.7 MB и ускорился почти в 5 раз без изменения поведения |
+| 2026-08-25 | Удалены one-shot scene builder/build pipeline и template assets | Готовая сцена больше не требует Editor API; стандартная сборка, Edit Mode и Play Mode проверены на чистой копии |

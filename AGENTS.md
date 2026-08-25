@@ -54,9 +54,6 @@ PromVR.MaterialAccumulation.Unity
 PromVR.MaterialAccumulation.Presentation
     references: Unity runtime layer, UnityEngine.UI
 
-PromVR.MaterialAccumulation.Editor
-    references: Unity runtime, Presentation, URP Editor-facing APIs
-
 PromVR.MaterialAccumulation.Tests.EditMode
     references: Core, NUnit/Unity Test Framework
 ```

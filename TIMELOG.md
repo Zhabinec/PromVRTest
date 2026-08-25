@@ -8,6 +8,7 @@
 | 14:18–14:49 | Требования, архитектура и правила агентов | 0h 31m | `PROJECT.md`, `AGENTS.md` |
 | 14:49–16:16 | Core, tests, dynamic Mesh, input и vertical slice | 1h 27m | проверенная базовая механика |
 | 16:16–17:37 | Code/UI/scene polish, allocation guard, package trim, Windows build и документация | 1h 21m | production-pass |
-| **Итого** | **Реализация и проверка текущего состояния** | **3h 47m** | видео и длительный Profiler capture не включены |
+| 17:37–19:31 | Финальная очистка template assets/packages, удаление Editor tooling и cold validation | 1h 54m | чистая структура, `13/13` Edit Mode, `2/2` Play Mode, стандартный Windows build |
+| **Итого** | **Реализация и проверка текущего состояния** | **5h 41m** | видео и длительный Profiler capture не включены |
 
 После записи видео и Profiler-прогона их фактическое время нужно добавить отдельными строками, не изменяя уже зафиксированные интервалы.
