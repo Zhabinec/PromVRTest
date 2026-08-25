@@ -1,6 +1,6 @@
 # Material Accumulation — проектный план
 
-> Статус: рабочий вертикальный срез; profiling/build/video ещё не завершены
+> Статус: production-polish и standalone build проверены; длительный Profiler capture и видео ещё не завершены
 > Unity: `6000.3.10f1`
 > Render Pipeline: URP 17.3
 > Основная платформа демонстрации: Windows, клавиатура
@@ -97,7 +97,15 @@ Time          ┘                                  │
 
 Unity-зависимости заканчиваются в этой сборке. `AnimationCurve`, `Time`, Input System, `Mesh`, материалы и жизненный цикл компонентов не проникают в Core.
 
-### 4.3 Почему состояние не хранится в вершинах
+### 4.3 Presentation и Editor tooling
+
+- `PromVR.MaterialAccumulation.Presentation` содержит только HUD и читает узкий read-only API controller-а. Накопление из UI не вызывается.
+- HUD обновляет Image fill и меняет заранее созданные строки только при смене состояния; per-frame форматирования чисел нет.
+- `PromVR.MaterialAccumulation.Editor` воспроизводимо собирает сцену, материалы, URP post-process и Player Settings через Editor API.
+- Отдельный build pipeline создаёт Windows Development/Release Player из одной проверенной сцены.
+- Simulation и dirty Mesh sync имеют именованные `ProfilerMarker`, чтобы измерять их независимо в Profiler.
+
+### 4.4 Почему состояние не хранится в вершинах
 
 Чтение/запись `mesh.vertices` связывает алгоритм с Unity, смешивает модель с представлением и часто провоцирует копирование массивов. Отдельный `HeightField` даёт:
 
@@ -290,7 +298,11 @@ Assets/_Project/
 ├── Scripts/
 │   ├── Editor/
 │   │   ├── MaterialAccumulationDemoBuilder.cs
+│   │   ├── MaterialAccumulationBuildPipeline.cs
 │   │   └── PromVR.MaterialAccumulation.Editor.asmdef
+│   ├── Presentation/
+│   │   ├── DemoHudBehaviour.cs
+│   │   └── PromVR.MaterialAccumulation.Presentation.asmdef
 │   └── Runtime/
 │       ├── Core/
 │       │   ├── GridDescriptor.cs
@@ -322,7 +334,7 @@ AGENTS.md
 TIMELOG.md
 ```
 
-`Application`-слой выделяется в отдельную папку/сборку только если orchestration действительно разрастается. На старте два ясных слоя лучше трёх пустых абстракций.
+`Application`-слой не выделяется: orchestration остаётся в узких Unity-компонентах. Presentation появилась только после возникновения реального динамического HUD и не содержит доменной логики.
 
 ## 11. Стиль C# и объектная модель
 
@@ -509,44 +521,45 @@ Jobs/GPU не должны появляться до профилировани�
 | Mesh update создаёт мусор | Постоянные буферы и Profiler после прогрева |
 | Нормали не обновлены рядом с dirty rect | Расширение области на одну ячейку |
 | Кисть доходит до края, поверхность выглядит незамкнутой | Clamp центра с учётом радиуса |
-| Архитектура переусложняется | Только два обязательных слоя и интерфейсы по необходимости |
+| Архитектура переусложняется | Узкие assembly-границы появляются только вокруг реальных Core/Unity/UI responsibilities |
 | Сцена работает только в Editor | Standalone build smoke test |
 | Красивое видео скрывает отсутствие доказательств | В README есть тесты, Profiler и ограничения |
 
 ## 20. Текущий проверенный статус
 
-На 2026-08-25 собран первый рабочий вертикальный срез:
+На 2026-08-25 собран и проверен production-polish pass:
 
-- Core, Unity runtime, Editor builder, URP-материалы и демо-сцена компилируются в Unity `6000.3.10f1`;
+- Core, Unity runtime, Presentation, Editor tooling, URP-материалы и демо-сцена компилируются в Unity `6000.3.10f1`;
 - `13/13` Edit Mode тестов пройдены в batch mode;
-- `1/1` Play Mode smoke test пройден: сцена загружается, создаёт Mesh на `16 641` вершину, принимает sweep и reset;
+- `2/2` Play Mode тестов пройдены: сцена загружается, сохраняет число GameObject/Mesh и выполняет 90 swept updates с `0 B` managed allocations после прогрева;
+- Windows Development Build собран из чистой output-папки: `155.7 MB` за `49.6 s`;
+- standalone Player прошёл 8-секундный D3D12 smoke без runtime exceptions;
+- неиспользуемые AI/Sentis, Pipeline, Visual Scripting, Multiplayer, Collab, Navigation и Timeline direct packages удалены; clean build уменьшился с `201.4 MB / 243.1 s` до `155.7 MB / 49.6 s`;
 - сцена `Assets/_Project/Scenes/MaterialAccumulationDemo.unity` назначена стартовой в Build Settings;
-- рабочие assets расположены только внутри `Assets/_Project`.
+- рабочие assets расположены внутри `Assets/_Project`, документационный кадр — в `Documentation/Images`.
 
 Пока не подтверждены и не должны заявляться как готовые:
 
-- `0 B/frame` в Profiler после длительного steady-state прогона;
-- standalone Development Build;
-- ручная UX/визуальная проверка полного сценария;
-- видео, финальный time log и результаты измерений.
+- `0 B/frame` в 60-секундном Profiler capture; автоматический allocation guard не подменяет этот прогон;
+- видео и финальные CPU median/p95.
 
 ## 21. Definition of Done
 
 Задание готово к отправке только когда выполнено всё ниже:
 
 - [ ] Чистое клонирование открывается в указанной Unity без ошибок Console.
-- [ ] Demo Scene является стартовой и сразу объясняет управление.
-- [ ] Все обязательные Inspector-параметры работают во время выполнения.
-- [ ] Статическое, движущееся, быстрое, повторное и пересекающееся накопление показано и корректно.
-- [ ] Старый материал не уменьшается ни при одном воздействии, кроме Reset.
-- [ ] Core не зависит от UnityEngine и покрыт основными Edit Mode тестами.
-- [ ] Edit Mode тесты проходят в batch mode.
-- [ ] Standalone Development Build проходит smoke test.
+- [x] Demo Scene является стартовой и сразу объясняет управление.
+- [x] Все обязательные Inspector-параметры работают во время выполнения.
+- [x] Статическое, движущееся, быстрое, повторное и пересекающееся накопление показано и корректно.
+- [x] Старый материал не уменьшается ни при одном воздействии, кроме Reset.
+- [x] Core не зависит от UnityEngine и покрыт основными Edit Mode тестами.
+- [x] Edit Mode тесты проходят в batch mode.
+- [x] Standalone Development Build проходит smoke test.
 - [ ] После прогрева Profiler показывает `0 B/frame` managed allocations рабочего цикла.
-- [ ] Во время работы не появляются новые GameObject или Mesh.
-- [ ] Runtime Mesh/native buffers корректно освобождаются.
-- [ ] Нет committed `Library`, `Temp`, `Logs`, build artifacts или пользовательских настроек.
-- [ ] Git-история последовательна и состоит из содержательных проверенных шагов.
+- [x] Во время работы не появляются новые GameObject или Mesh.
+- [x] Runtime Mesh корректно освобождается; persistent native buffers не используются.
+- [x] Нет committed `Library`, `Temp`, `Logs`, build artifacts или пользовательских настроек.
+- [x] Git-история последовательна и состоит из содержательных проверенных шагов.
 - [ ] README содержит видео, способ хранения/обновления, фактическое время, ограничения и улучшения.
 - [ ] Видео короткое, читаемое и показывает все спорные требования.
 
@@ -559,3 +572,6 @@ Jobs/GPU не должны появляться до профилировани�
 | 2026-08-25 | Нормализованная центрированная radius curve | Понятная семантика base/amplitude и заранее известные bounds |
 | 2026-08-25 | Core без UnityEngine, Unity как внешний адаптер | Тестируемость и малая связанность без избыточной абстракции |
 | 2026-08-25 | Все авторские assets размещаются в `Assets/_Project` | Единая изолированная структура проекта по запросу владельца репозитория |
+| 2026-08-25 | Отдельная Presentation-сборка только для существующего HUD | UI не загрязняет runtime/Core, зависимость остаётся направленной внутрь |
+| 2026-08-25 | Статичный cover скрывает первые 2 mm высоты | Нулевой оранжевый Mesh визуально не выглядит уже накопленным материалом |
+| 2026-08-25 | Удалены неиспользуемые template packages | Clean build уменьшился на 45.7 MB и ускорился почти в 5 раз без изменения поведения |

@@ -51,6 +51,12 @@ PromVR.MaterialAccumulation.Core
 PromVR.MaterialAccumulation.Unity
     references: Core, UnityEngine, Input System, URP only where needed
 
+PromVR.MaterialAccumulation.Presentation
+    references: Unity runtime layer, UnityEngine.UI
+
+PromVR.MaterialAccumulation.Editor
+    references: Unity runtime, Presentation, URP Editor-facing APIs
+
 PromVR.MaterialAccumulation.Tests.EditMode
     references: Core, NUnit/Unity Test Framework
 ```
@@ -59,10 +65,11 @@ PromVR.MaterialAccumulation.Tests.EditMode
 - Unity-слой преобразует координаты, владеет ресурсами и вызывает Core.
 - View читает height field и dirty region, но не решает, сколько материала добавить.
 - Input/preview не изменяют массив высот напрямую.
+- Presentation читает только публичное состояние controller-а и не вызывает накопление напрямую.
 - Не используйте singleton, service locator, статическое глобальное состояние или поиск зависимостей через `Find*` в рабочем цикле.
 - Не вводите интерфейс, фабрику или DI framework без второй реальной реализации/границы тестирования.
 
-Предпочтительная простота: маленькие конкретные Core-типы, явные конструкторы и несколько узких Unity-адаптеров.
+Предпочтительная простота: маленькие конкретные Core-типы, явные конструкторы и несколько узких Unity-адаптеров. Отдельная Presentation-сборка оправдана существующим динамическим HUD и не должна становиться вторым application layer.
 
 ## Правила Core
 
