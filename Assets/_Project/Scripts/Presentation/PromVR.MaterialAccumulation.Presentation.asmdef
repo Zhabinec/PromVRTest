@@ -1,0 +1,17 @@
+{
+  "name": "PromVR.MaterialAccumulation.Presentation",
+  "rootNamespace": "PromVR.MaterialAccumulation.Presentation",
+  "references": [
+    "PromVR.MaterialAccumulation.Unity",
+    "UnityEngine.UI"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

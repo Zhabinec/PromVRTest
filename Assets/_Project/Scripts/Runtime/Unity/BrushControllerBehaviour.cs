@@ -8,7 +8,7 @@ namespace PromVR.MaterialAccumulation.Unity
     [DefaultExecutionOrder(50)]
     public sealed class BrushControllerBehaviour : MonoBehaviour
     {
-        private const float MinimumRadius = 0.01f;
+        private const float MinimumAllowedRadius = 0.01f;
 
         [Header("References")]
         [SerializeField]
@@ -22,7 +22,7 @@ namespace PromVR.MaterialAccumulation.Unity
         private float _movementSpeed = 3f;
 
         [Header("Radius")]
-        [SerializeField, Min(MinimumRadius), Tooltip("Middle value of the animated radius in metres.")]
+        [SerializeField, Min(MinimumAllowedRadius), Tooltip("Middle value of the animated radius in metres.")]
         private float _baseRadius = 1.25f;
 
         [SerializeField, Min(0f), Tooltip("Maximum deviation from the base radius in metres.")]
@@ -43,6 +43,28 @@ namespace PromVR.MaterialAccumulation.Unity
         private float _centerX;
         private float _centerZ;
         private float _currentRadius;
+        private bool _isAccumulating;
+
+        public float CurrentRadius => _currentRadius;
+
+        public float MinimumAnimatedRadius => _baseRadius - _radiusAmplitude;
+
+        public float MaximumAnimatedRadius => _baseRadius + _radiusAmplitude;
+
+        public float NormalizedRadius
+        {
+            get
+            {
+                float range = MaximumAnimatedRadius - MinimumAnimatedRadius;
+                return range > Mathf.Epsilon
+                    ? Mathf.Clamp01((_currentRadius - MinimumAnimatedRadius) / range)
+                    : 0.5f;
+            }
+        }
+
+        public bool IsAccumulating => _isAccumulating;
+
+        public Vector2 LocalCenter => new Vector2(_centerX, _centerZ);
 
         private void Awake()
         {
@@ -79,8 +101,8 @@ namespace PromVR.MaterialAccumulation.Unity
             _currentRadius = EvaluateRadius();
             _surface.ClampCenter(ref _centerX, ref _centerZ, _currentRadius);
 
-            bool isAccumulating = keyboard != null && keyboard.spaceKey.isPressed;
-            if (isAccumulating && deltaTime > 0f)
+            _isAccumulating = keyboard != null && keyboard.spaceKey.isPressed;
+            if (_isAccumulating && deltaTime > 0f)
             {
                 Sweep sweep = new Sweep(
                     previousX,
@@ -105,7 +127,7 @@ namespace PromVR.MaterialAccumulation.Unity
             }
 #endif
 
-            UpdateZoneView(isAccumulating);
+            UpdateZoneView(_isAccumulating);
         }
 
         private void OnValidate()
@@ -158,8 +180,14 @@ namespace PromVR.MaterialAccumulation.Unity
         private void ValidateConfiguration()
         {
             _movementSpeed = Mathf.Max(0f, _movementSpeed);
-            _baseRadius = Mathf.Max(MinimumRadius, _baseRadius);
-            _radiusAmplitude = Mathf.Clamp(_radiusAmplitude, 0f, _baseRadius - MinimumRadius);
+            float maximumRadius = _surface != null
+                ? Mathf.Max(MinimumAllowedRadius, _surface.MaximumRadiusInsideSurface)
+                : float.MaxValue;
+            _baseRadius = Mathf.Clamp(_baseRadius, MinimumAllowedRadius, maximumRadius);
+            float maximumAmplitude = Mathf.Min(
+                _baseRadius - MinimumAllowedRadius,
+                maximumRadius - _baseRadius);
+            _radiusAmplitude = Mathf.Clamp(_radiusAmplitude, 0f, maximumAmplitude);
             _radiusFrequency = Mathf.Max(0f, _radiusFrequency);
         }
     }

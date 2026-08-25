@@ -3,7 +3,8 @@
   "rootNamespace": "PromVR.MaterialAccumulation.Tests.PlayMode",
   "references": [
     "PromVR.MaterialAccumulation.Core",
-    "PromVR.MaterialAccumulation.Unity"
+    "PromVR.MaterialAccumulation.Unity",
+    "PromVR.MaterialAccumulation.Presentation"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

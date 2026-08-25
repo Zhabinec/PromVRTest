@@ -3,7 +3,10 @@
   "rootNamespace": "PromVR.MaterialAccumulation.Editor",
   "references": [
     "PromVR.MaterialAccumulation.Unity",
-    "UnityEngine.UI"
+    "PromVR.MaterialAccumulation.Presentation",
+    "UnityEngine.UI",
+    "Unity.RenderPipelines.Core.Runtime",
+    "Unity.RenderPipelines.Universal.Runtime"
   ],
   "includePlatforms": [
     "Editor"

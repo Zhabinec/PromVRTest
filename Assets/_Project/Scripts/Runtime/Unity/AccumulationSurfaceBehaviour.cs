@@ -1,4 +1,5 @@
 using PromVR.MaterialAccumulation.Core;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace PromVR.MaterialAccumulation.Unity
@@ -7,6 +8,12 @@ namespace PromVR.MaterialAccumulation.Unity
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public sealed class AccumulationSurfaceBehaviour : MonoBehaviour
     {
+        private static readonly ProfilerMarker ApplySweepMarker =
+            new ProfilerMarker("MaterialAccumulation.ApplySweep");
+
+        private static readonly ProfilerMarker ResetMarker =
+            new ProfilerMarker("MaterialAccumulation.Reset");
+
         [Header("Surface")]
         [SerializeField, Min(0.1f), Tooltip("Surface width in local metres.")]
         private float _sizeX = 12f;
@@ -36,6 +43,8 @@ namespace PromVR.MaterialAccumulation.Unity
 
         public float MaximumRadiusInsideSurface => Mathf.Min(_sizeX, _sizeZ) * 0.5f;
 
+        public int VertexCount => (_resolutionX + 1) * (_resolutionZ + 1);
+
         private void Awake()
         {
             Initialize();
@@ -62,24 +71,30 @@ namespace PromVR.MaterialAccumulation.Unity
 
         public void ApplySweep(in Sweep sweep)
         {
-            if (!_isInitialized)
+            using (ApplySweepMarker.Auto())
             {
-                Initialize();
-            }
+                if (!_isInitialized)
+                {
+                    Initialize();
+                }
 
-            GridRect dirty = _accumulator.Apply(sweep, _accumulationSpeed);
-            _meshView.Sync(dirty);
+                GridRect dirty = _accumulator.Apply(sweep, _accumulationSpeed);
+                _meshView.Sync(dirty);
+            }
         }
 
         public void ResetSurface()
         {
-            if (!_isInitialized)
+            using (ResetMarker.Auto())
             {
-                Initialize();
-            }
+                if (!_isInitialized)
+                {
+                    Initialize();
+                }
 
-            GridRect dirty = _heightField.Reset();
-            _meshView.Sync(dirty);
+                GridRect dirty = _heightField.Reset();
+                _meshView.Sync(dirty);
+            }
         }
 
         public void SetMaximumExpectedHeight(float maximumHeight)

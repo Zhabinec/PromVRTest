@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using PromVR.MaterialAccumulation.Core;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
@@ -10,6 +11,9 @@ namespace PromVR.MaterialAccumulation.Unity
     internal sealed class HeightFieldMeshView : IDisposable
     {
         private const int NormalDependencyBorder = 1;
+
+        private static readonly ProfilerMarker SyncMarker =
+            new ProfilerMarker("MaterialAccumulation.MeshSync");
 
         private static readonly MeshUpdateFlags UploadFlags =
             MeshUpdateFlags.DontRecalculateBounds |
@@ -51,23 +55,26 @@ namespace PromVR.MaterialAccumulation.Unity
                 return;
             }
 
-            GridRect uploadRect = dirty.Expand(
-                NormalDependencyBorder,
-                _grid.VertexCountX - 1,
-                _grid.VertexCountZ - 1);
-
-            UpdateVertexData(uploadRect);
-
-            for (int z = uploadRect.MinZ; z <= uploadRect.MaxZ; z++)
+            using (SyncMarker.Auto())
             {
-                int rowStart = _grid.GetIndex(uploadRect.MinX, z);
-                _mesh.SetVertexBufferData(
-                    _vertices,
-                    rowStart,
-                    rowStart,
-                    uploadRect.Width,
-                    0,
-                    UploadFlags);
+                GridRect uploadRect = dirty.Expand(
+                    NormalDependencyBorder,
+                    _grid.VertexCountX - 1,
+                    _grid.VertexCountZ - 1);
+
+                UpdateVertexData(uploadRect);
+
+                for (int z = uploadRect.MinZ; z <= uploadRect.MaxZ; z++)
+                {
+                    int rowStart = _grid.GetIndex(uploadRect.MinX, z);
+                    _mesh.SetVertexBufferData(
+                        _vertices,
+                        rowStart,
+                        rowStart,
+                        uploadRect.Width,
+                        0,
+                        UploadFlags);
+                }
             }
         }
 
