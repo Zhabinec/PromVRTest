@@ -1,6 +1,6 @@
 # Material Accumulation — проектный план
 
-> Статус: проектирование
+> Статус: рабочий вертикальный срез; profiling/build/video ещё не завершены
 > Unity: `6000.3.10f1`
 > Render Pipeline: URP 17.3
 > Основная платформа демонстрации: Windows, клавиатура
@@ -281,31 +281,40 @@ Runtime Mesh уничтожается в `OnDestroy`. Persistent native buffer �
 ## 10. Предлагаемая структура файлов
 
 ```text
-Assets/MaterialAccumulation/
-├── Runtime/
-│   ├── Core/
-│   │   ├── GridDescriptor.cs
-│   │   ├── GridRect.cs
-│   │   ├── HeightField.cs
-│   │   ├── Sweep.cs
-│   │   ├── HemisphereAccumulator.cs
-│   │   └── PromVR.MaterialAccumulation.Core.asmdef
-│   └── Unity/
-│       ├── AccumulationSurfaceBehaviour.cs
-│       ├── BrushControllerBehaviour.cs
-│       ├── HeightFieldMeshView.cs
-│       ├── HemisphereZoneView.cs
-│       └── PromVR.MaterialAccumulation.Unity.asmdef
-├── Tests/
-│   └── EditMode/
-│       ├── HeightFieldTests.cs
-│       ├── HemisphereAccumulatorTests.cs
-│       ├── SweepContinuityTests.cs
-│       └── PromVR.MaterialAccumulation.Tests.EditMode.asmdef
+Assets/_Project/
+├── Art/
 ├── Materials/
 ├── Prefabs/
-└── Scenes/
-    └── MaterialAccumulationDemo.unity
+├── Scenes/
+│   └── MaterialAccumulationDemo.unity
+├── Scripts/
+│   ├── Editor/
+│   │   ├── MaterialAccumulationDemoBuilder.cs
+│   │   └── PromVR.MaterialAccumulation.Editor.asmdef
+│   └── Runtime/
+│       ├── Core/
+│       │   ├── GridDescriptor.cs
+│       │   ├── GridRect.cs
+│       │   ├── HeightField.cs
+│       │   ├── Sweep.cs
+│       │   ├── HemisphereAccumulator.cs
+│       │   └── PromVR.MaterialAccumulation.Core.asmdef
+│       └── Unity/
+│           ├── AccumulationSurfaceBehaviour.cs
+│           ├── BrushControllerBehaviour.cs
+│           ├── HeightFieldMeshView.cs
+│           ├── HemisphereZoneView.cs
+│           └── PromVR.MaterialAccumulation.Unity.asmdef
+├── Settings/
+├── Tests/
+│   ├── EditMode/
+│   │   ├── HeightFieldTests.cs
+│   │   ├── HemisphereAccumulatorTests.cs
+│   │   ├── SweepContinuityTests.cs
+│   │   └── PromVR.MaterialAccumulation.Tests.EditMode.asmdef
+│   └── PlayMode/
+│       ├── DemoSceneSmokeTests.cs
+│       └── PromVR.MaterialAccumulation.Tests.PlayMode.asmdef
 
 README.md
 PROJECT.md
@@ -504,7 +513,24 @@ Jobs/GPU не должны появляться до профилировани�
 | Сцена работает только в Editor | Standalone build smoke test |
 | Красивое видео скрывает отсутствие доказательств | В README есть тесты, Profiler и ограничения |
 
-## 20. Definition of Done
+## 20. Текущий проверенный статус
+
+На 2026-08-25 собран первый рабочий вертикальный срез:
+
+- Core, Unity runtime, Editor builder, URP-материалы и демо-сцена компилируются в Unity `6000.3.10f1`;
+- `13/13` Edit Mode тестов пройдены в batch mode;
+- `1/1` Play Mode smoke test пройден: сцена загружается, создаёт Mesh на `16 641` вершину, принимает sweep и reset;
+- сцена `Assets/_Project/Scenes/MaterialAccumulationDemo.unity` назначена стартовой в Build Settings;
+- рабочие assets расположены только внутри `Assets/_Project`.
+
+Пока не подтверждены и не должны заявляться как готовые:
+
+- `0 B/frame` в Profiler после длительного steady-state прогона;
+- standalone Development Build;
+- ручная UX/визуальная проверка полного сценария;
+- видео, финальный time log и результаты измерений.
+
+## 21. Definition of Done
 
 Задание готово к отправке только когда выполнено всё ниже:
 
@@ -524,7 +550,7 @@ Jobs/GPU не должны появляться до профилировани�
 - [ ] README содержит видео, способ хранения/обновления, фактическое время, ограничения и улучшения.
 - [ ] Видео короткое, читаемое и показывает все спорные требования.
 
-## 21. Журнал решений
+## 22. Журнал решений
 
 | Дата | Решение | Причина |
 |---|---|---|
@@ -532,3 +558,4 @@ Jobs/GPU не должны появляться до профилировани�
 | 2026-08-25 | Трапецеидальный time-weighted sweep | Даёт непрерывность без умножения времени воздействия числом stamps |
 | 2026-08-25 | Нормализованная центрированная radius curve | Понятная семантика base/amplitude и заранее известные bounds |
 | 2026-08-25 | Core без UnityEngine, Unity как внешний адаптер | Тестируемость и малая связанность без избыточной абстракции |
+| 2026-08-25 | Все авторские assets размещаются в `Assets/_Project` | Единая изолированная структура проекта по запросу владельца репозитория |

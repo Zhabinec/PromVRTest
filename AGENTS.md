@@ -205,12 +205,14 @@ newHeight = max(oldHeight, candidate)
 
 ```powershell
 & 'C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Unity.exe' `
-  -batchmode -quit `
+  -batchmode -automated `
   -projectPath 'E:\DEVELOPING\IncrementalGame\Project\PromVRTest' `
   -runTests -testPlatform editmode `
   -testResults 'E:\DEVELOPING\IncrementalGame\Project\PromVRTest\Logs\EditModeResults.xml' `
   -logFile 'E:\DEVELOPING\IncrementalGame\Project\PromVRTest\Logs\EditModeTests.log'
 ```
+
+Не добавляйте `-quit` к `-runTests`: Unity Test Framework сам завершает процесс после записи XML, а ранний `-quit` в Unity 6.3 может закрыть Editor до запуска NUnit.
 
 Не завершайте пользовательский Unity-процесс и не обходите lock проекта. Если проверка недоступна, явно сообщите, что именно не запускалось и почему.
 
