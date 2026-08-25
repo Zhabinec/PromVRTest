@@ -1,0 +1,19 @@
+{
+  "name": "PromVR.MaterialAccumulation.Editor",
+  "rootNamespace": "PromVR.MaterialAccumulation.Editor",
+  "references": [
+    "PromVR.MaterialAccumulation.Unity",
+    "UnityEngine.UI"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
