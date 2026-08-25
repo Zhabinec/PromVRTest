@@ -1,0 +1,17 @@
+{
+  "name": "PromVR.MaterialAccumulation.Unity",
+  "rootNamespace": "PromVR.MaterialAccumulation.Unity",
+  "references": [
+    "PromVR.MaterialAccumulation.Core",
+    "Unity.InputSystem"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
