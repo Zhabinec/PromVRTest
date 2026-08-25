@@ -6,6 +6,7 @@ using PromVR.MaterialAccumulation.Unity;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 
 namespace PromVR.MaterialAccumulation.Tests.PlayMode
 {
@@ -33,6 +34,29 @@ namespace PromVR.MaterialAccumulation.Tests.PlayMode
             Assert.That(hud, Is.Not.Null);
             Assert.That(controller.CurrentRadius, Is.GreaterThan(0f));
             Assert.That(controller.NormalizedRadius, Is.InRange(0f, 1f));
+
+            GameObject languageButtonObject = GameObject.Find("Language Toggle");
+            GameObject languageLabelObject = GameObject.Find("Language Label");
+            GameObject titleObject = GameObject.Find("Title");
+            Assert.That(languageButtonObject, Is.Not.Null);
+            Assert.That(languageLabelObject, Is.Not.Null);
+            Assert.That(titleObject, Is.Not.Null);
+
+            Button languageButton = languageButtonObject.GetComponent<Button>();
+            Text languageLabel = languageLabelObject.GetComponent<Text>();
+            Text titleLabel = titleObject.GetComponent<Text>();
+            Assert.That(languageButton, Is.Not.Null);
+            Assert.That(languageLabel, Is.Not.Null);
+            Assert.That(titleLabel, Is.Not.Null);
+
+            string initialLanguage = languageLabel.text;
+            string initialTitle = titleLabel.text;
+            languageButton.onClick.Invoke();
+            Assert.That(languageLabel.text, Is.Not.EqualTo(initialLanguage));
+            Assert.That(titleLabel.text, Is.Not.EqualTo(initialTitle));
+            languageButton.onClick.Invoke();
+            Assert.That(languageLabel.text, Is.EqualTo(initialLanguage));
+            Assert.That(titleLabel.text, Is.EqualTo(initialTitle));
 
             MeshFilter meshFilter = surface.GetComponent<MeshFilter>();
             Assert.That(meshFilter.sharedMesh, Is.Not.Null);

@@ -22,6 +22,7 @@
 | `Space` | Накопление материала |
 | `R` | Полный сброс поверхности |
 | `Esc` | Выход из standalone build |
+| `RU / EN` в верхней панели | Переключение языка HUD; выбор сохраняется между запусками |
 
 Скорость движения, базовый радиус, амплитуда, частота, `AnimationCurve` и скорость накопления настраиваются на `Brush Controller` и `Accumulation Surface` в Inspector.
 
@@ -59,7 +60,7 @@ Input System / AnimationCurve / Time
 
 - `PromVR.MaterialAccumulation.Core` — чистый C# с `noEngineReferences: true`.
 - `PromVR.MaterialAccumulation.Unity` — ввод, lifecycle, coordinate conversion и Mesh view.
-- `PromVR.MaterialAccumulation.Presentation` — безаллокционный HUD, зависящий только от read-only API controller-а.
+- `PromVR.MaterialAccumulation.Presentation` — безаллокционное per-frame обновление HUD, локализация RU/EN и сохранение выбранного языка; слой зависит только от read-only API controller-а.
 - Preview полусферы — один переиспользуемый объект; порции материала не создают GameObject/Mesh.
 - Simulation и Mesh sync размечены отдельными `ProfilerMarker`.
 
